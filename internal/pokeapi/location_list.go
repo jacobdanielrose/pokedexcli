@@ -6,9 +6,19 @@ import (
 )
 
 func (c *Client) ListLocations(pageURL *string) (LocationAreasResponse, error) {
-	url := baseURL + "/location-area"
+	url := BaseUrl + "/location-area"
 	if pageURL != nil {
 		url = *pageURL
+	}
+
+	if val, ok := c.cache.Get(url); ok {
+		locationsResp := LocationAreasResponse{}
+		err := json.Unmarshal(val, &locationsResp)
+		if err != nil {
+			return LocationAreasResponse{}, err
+		}
+
+		return locationsResp, nil
 	}
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -28,5 +38,7 @@ func (c *Client) ListLocations(pageURL *string) (LocationAreasResponse, error) {
 		return LocationAreasResponse{}, err
 	}
 
+	toCache, _ := json.Marshal(locationsResponse)
+	c.cache.Add(url, toCache)
 	return locationsResponse, nil
 }
