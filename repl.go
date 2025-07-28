@@ -13,6 +13,7 @@ type config struct {
 	pokeapiClient    pokeapi.Client
 	nextLocationsURL *string
 	prevLocationsURL *string
+	parameter        *string
 }
 
 func startRepl(cfg *config) {
@@ -29,9 +30,15 @@ func startRepl(cfg *config) {
 		}
 
 		commandName := words[0]
+		args := []string{}
+		if len(words) > 1 {
+			args = words[1:]
+		}
+
 		command, exists := commands[commandName]
+
 		if exists {
-			err := command.callback(cfg)
+			err := command.callback(cfg, args...)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -52,7 +59,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(cfg *config) error
+	callback    func(cfg *config, args ...string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -69,13 +76,18 @@ func getCommands() map[string]cliCommand {
 		},
 		"map": {
 			name:        "map",
-			description: "Retrieve either the first or next 20 map locations",
+			description: "Retrieve next 20 map locations",
 			callback:    commandMapf,
 		},
 		"mapb": {
 			name:        "mapb",
 			description: "Retrieve previous 20 map locations",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore <location_name>",
+			description: "Return all pokemon that can be found in a given location",
+			callback:    commandExplore,
 		},
 	}
 }
