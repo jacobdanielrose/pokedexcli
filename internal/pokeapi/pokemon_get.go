@@ -35,7 +35,7 @@ func (c *Client) GetPokemon(pokemonName string) (Pokemon, error) {
 	}
 
 	pokemonResponse := Pokemon{}
-	json.Unmarshal(dat, &pokemonResponse)
+	err = json.Unmarshal(dat, &pokemonResponse)
 	if err != nil {
 		return Pokemon{}, err
 	}
